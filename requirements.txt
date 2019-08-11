@@ -1,3 +1,6 @@
 opencv-python
-fastai==1.0.55
+fastai==1.0.57
 torchvision
+psutil
+rasterio
+scikit-image

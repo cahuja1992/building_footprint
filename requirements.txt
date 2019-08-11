@@ -1,0 +1,3 @@
+opencv-python
+fastai==1.0.55
+torchvision

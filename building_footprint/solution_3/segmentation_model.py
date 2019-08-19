@@ -5,6 +5,7 @@ from keras.layers.normalization import *
 from .data_prep import get_val_and_generator
 import os 
 import sys
+from .data_prep import *
 # import keras.optimizers.Adam
 
 net_shape = (512, 512)
@@ -79,7 +80,7 @@ def pred_proc(arg):
 
     model_file = '2_96'
     model = create_model()
-    model.load_weights('model/{}.h5'.format(model_file))
+    model.load_weights('/ws/building_footprint/solution_3/model/{}.h5'.format(model_file))
 
     for fn in filenames:    
         dt1 = datetime.datetime.now()

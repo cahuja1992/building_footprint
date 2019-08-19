@@ -17,6 +17,7 @@ import keras.preprocessing.image
 import xgboost as xgb
 
 img_shape = (1280, 1280)
+net_shape = (512, 512)
 gtf = "labels_stitched_1280x1280/poly_xy_footprints"
 
 ROOT_DIR = "/ws/data/"
@@ -75,16 +76,18 @@ def CreateLabel(fn, gtf):
 def CreateData(path, fn, gtf=None):
     img = skimage.io.imread('{0}/images/{1}.png'.format(path, fn))
     if gtf is not None:
-        data = np.zeros(img_shape + (5,), dtype='uint8')
-        data[:, :, 3], data[:, :, 4] = CreateLabel(fn, gtf)
+        data = np.zeros(net_shape + (5,), dtype='uint8')
+        label_fill, label_edge = CreateLabel(fn, gtf)
+        
+        data[:, :, 3], data[:, :, 4] = scipy.misc.imresize(data[:, :, 3], net_shape), scipy.misc.imresize(data[:, :, 4], net_shape)
     else:
-        data = np.zeros(img_shape + (3,), dtype='uint8')
+        data = np.zeros(net_shape + (3,), dtype='uint8')
 
     
     data_shape = data.shape[:-1]
     
     for ch in range(3):
-        data[:data_shape[0], :data_shape[1], ch] = img[:data_shape[0], :data_shape[1], ch]
+        data[:data_shape[0], :data_shape[1], ch] = scipy.misc.imresize(img[:data_shape[0], :data_shape[1], ch], net_shape)
 
     return data
 

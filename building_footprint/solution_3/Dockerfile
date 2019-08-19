@@ -60,12 +60,8 @@ RUN pip install --upgrade --no-deps git+git://github.com/Theano/Theano.git
 RUN ln -s /usr/local/nvidia/lib64/libcuda.so.1 /usr/lib/x86_64-linux-gnu/libcuda.so
 
 RUN pip install keras
-ENV KERAS_BACKEND theano
+ENV KERAS_BACKEND tensorflow
 RUN python -c "import keras"
-
-# theano
-# Set up .theanorc for CUDA 
-RUN echo "[global]\ndevice=gpu\nfloatX=float32\noptimizer_including=cudnn\n[lib]\ncnmem=0.94\n[nvcc]\nfastmath=True" > /root/.theanorc
 
 ########################################################################################
 

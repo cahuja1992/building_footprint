@@ -91,9 +91,6 @@ def CreateData(path, fn, gtf=None):
 
     return data
 
-# for fn in GetFileList(ROOT_DIR):
-#     CreateData(ROOT_DIR, fn, gtf)
-#     exit(1)
 
 def CreateTrain(path, gtf_path):
     os.makedirs('train', exist_ok=True)

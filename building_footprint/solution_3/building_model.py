@@ -1,5 +1,10 @@
 import numpy as np
+import xgboost as xgb
+import sys
+from .segmentation_model import pred_proc
 
+
+img_shape = (512, 512)
 
 def FindAllClusters( intensity, edge ):
     precision = 1e9
@@ -139,7 +144,6 @@ def train_building_proc(arg):
     ith = arg[2]
     gtf_path = arg[3]
 
-    gtf = pd.read_csv(gtf_path)
 
     feature_list = []
     label_list = []
@@ -149,7 +153,7 @@ def train_building_proc(arg):
         cluster_count, cluster, features = FindAllClusters(area, edge)
         if cluster_count == 0: continue
 
-        truth_polygons = gtf.ix[(gtf['ImageId'] == fn) & (gtf['BuildingId'] >= 0), 'PolygonWKT_Pix']
+        truth_polygons = get_polygon(fn)
         truth = []
         for polygon in truth_polygons:
             img = np.zeros(img_shape, dtype=int)
@@ -208,3 +212,49 @@ def train_building(path, gtf_path, create_data=True, nthread=default_nthread):
     }
     model = xgb.train(params, dtrain, evals=[(dtrain, 'train'), (dval, 'val')], num_boost_round=1000, verbose_eval=True)
     model.save_model('model/xgb.model')
+
+def pred_proc(arg):
+    pred_proc(arg)
+
+    path = arg[0]
+    filenames = arg[1]
+
+    xgbmodel = xgb.Booster({'nthread': 1})
+    xgbmodel.load_model(arg[2])
+
+    minconfidence = 0.22
+    for fn in filenames:
+        dt2 = datetime.datetime.now()
+        area = np.load('area/{}.npz'.format(fn))
+        edge = np.load('edge/{}.npz'.format(fn))
+        cluster_count, cluster_raw, features = FindAllClusters(area, edge)
+        cluster = np.zeros(img_shape, dtype=int)
+        if cluster_count > 0:
+            confidence = pd.Series(xgbmodel.predict(xgb.DMatrix(features)))
+            rank = confidence.rank(method='first')
+            maxrank = rank.max()
+            minrank = rank[confidence >= minconfidence].min()
+            rank = rank - maxrank + 255
+            rank[confidence < minconfidence] = 0
+            rank[rank < 0] = 0            
+            for i in range(cluster_count):
+                cluster[cluster_raw == (i + 1)] = rank[i]
+
+        dt3 = datetime.datetime.now()
+        print(fn, cluster_count, int((dt3-dt2).total_seconds()))
+
+def predict(path, nthread=default_nthread):
+    nsplit = 20
+    all_files = GetFileList(path)
+    n = len(all_files)
+    filelist_group = [all_files[n*i//nsplit:n*(i+1)//nsplit] for i in range(nsplit)]
+
+    with multiprocessing.Pool(nthread) as pool:
+        pool.map(pred_proc, [(path, filelist, "model/xgb.model") for filelist in filelist_group])  
+
+if __name__ == "__main__":
+    command = sys.argv[1]
+    if command == 'train':
+        train()
+    if command == 'test':
+        predict(sys.argv[2])

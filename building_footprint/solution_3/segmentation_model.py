@@ -5,6 +5,7 @@ from keras.layers.normalization import *
 from .data_prep import get_val_and_generator
 import os 
 import sys
+# import keras.optimizers.Adam
 
 net_shape = (512, 512)
 
@@ -31,7 +32,7 @@ def create_model():
         pi.append(p)
         p = MaxPooling2D((2, 2))(p)
         p = conv([24] * 3, True)(p)
-    for npool in range(npooling):
+
         p = UpSampling2D((2, 2))(p)
         p = conv([24] * 1, True)(p)
         p = merge([p, pi[-1-npool]], mode='concat', concat_axis=3)
@@ -43,7 +44,7 @@ def create_model():
     output_edge = Activation('sigmoid', name='edge')(output_edge)
 
     model = Model(input=input, output=[output_area, output_edge])
-    model.compile(loss='binary_crossentropy', optimizer=Adam())
+    model.compile(loss='binary_crossentropy', optimizer='adam')
     return model
 
 

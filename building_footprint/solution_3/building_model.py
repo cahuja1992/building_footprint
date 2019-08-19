@@ -153,7 +153,7 @@ def train_building_proc(arg):
         cluster_count, cluster, features = FindAllClusters(area, edge)
         if cluster_count == 0: continue
 
-        truth_polygons = get_polygon(fn)
+        truth_polygons = get_polygons(fn)
         truth = []
         for polygon in truth_polygons:
             img = np.zeros(img_shape, dtype=int)

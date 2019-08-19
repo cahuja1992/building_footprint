@@ -26,11 +26,8 @@ def GetFileList(path):
 
 
 def draw_polygon(polygon):
-    p = re.findall(r'[0-9.]+ [0-9.]+ [0-9.]+', polygon)
-    sp = [pp.split(' ') for pp in p]
-    x = [round(float(pp[0])) for pp in sp]
-    y = [round(float(pp[1])) for pp in sp]
-    yy, xx = skimage.draw.polygon(y, x, img_shape)
+    y, x = polygon
+    yy, xx = skimage.draw.polygon(y, x, net_shape)
     return yy, xx
 
 def read_polygon(polyfile):
@@ -39,7 +36,27 @@ def read_polygon(polyfile):
 
     return polygon_data
 
+def get_polygons(fn):
+    polyfile = "{0}/{1}/{2}.txt".format(ROOT_DIR, gtf, fn)
+    polygon_data = read_polygon(polyfile)
+    polygons = np.array(building)
+    for poly in polygon_data:
+        record = poly.strip("/n")
+        record = record[1:]
+        record = record[:-2]
 
+        all_x = []
+        all_y = []
+
+        for x, y in map(lambda x : re.findall(r'\d+', x), re.findall(r'\[.*?\]', record)):
+            x, y = int(x), int(y)
+            all_x.append(x)
+            all_y.append(y)
+
+        polygons.append([all_y, all_x])
+    return polygons
+
+                
 
 def CreateLabel(fn, gtf):
     full_path = "{0}/{1}/{2}.txt".format(ROOT_DIR, gtf, fn)

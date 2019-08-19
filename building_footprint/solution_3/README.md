@@ -21,6 +21,7 @@ Structure of FCN: Input layer and output layer were connected with several dozen
 ```
 
 ## Part 2: Creating building polygons
+Greedy Clusering Borrowed from [here](!https://gist.github.com/hagerty/724b84ad69897d1fe6d241bbca9e2781)
 
 1. Define B to be the set of points in the heatmap that are predicted to be inside the building (positive distance from the boundary). Let b1 be the point in the heatmap with the largest value.
 2. Define the cluster, c1, as the largest connected component of B containing b1 such that there is a path of decreasing values between b1 and every point in c1. The cluster can be computationally identified with a nearest neighbor search.

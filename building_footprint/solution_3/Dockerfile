@@ -73,7 +73,5 @@ RUN conda install -y shapely gdal
 RUN pip install xgboost
 RUN echo "umask 0000" >> /root/.bashrc
 
-COPY program.py /root
-COPY model /root/model
 
 WORKDIR /root
